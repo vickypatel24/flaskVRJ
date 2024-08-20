@@ -1,0 +1,13 @@
+{% extends "_base.html" %} {% block content %}
+<div class="z">
+    <h1>Enter Video link</h1>
+<form action="/enter_link" method="POST">
+    <input name="text">
+    <input type="submit">
+</form>
+</div>
+<br>
+<div class="back">
+    <a href="{{ url_for('accounts.login') }}"><button type="button" class="btn btn-dark me-2">Go Back</button></a>
+    </div>
+{% endblock %}

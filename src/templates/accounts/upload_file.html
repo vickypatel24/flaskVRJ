@@ -1,0 +1,10 @@
+{% extends "_base.html" %} {% block content %}
+
+    <h1>Upload Excel File (.xlsx)</h1>
+    <form action="" method="post" enctype="multipart/form-data">
+        <input type="file" name="file"
+            accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel">
+        <input type="submit" value="Upload">
+<a href="{{ url_for('accounts.login') }}"><button type="button" class="btn btn-dark me-2">Go Back</button></a>
+    </form>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "_base.html" %} {% block content %}
+
+    <h1>Enter Text</h1>
+    <form action="" method="post">
+        
+        <a href="{{ url_for('accounts.login') }}"><button type="button" class="btn btn-dark me-2">Go Back</button></a>
+
+        <p><label for="w3review">Review:</label></p>
+        <textarea id="w3review" name="textarea" rows="4" cols="70">{{text_data}}</textarea>
+        <br>
+          <label for="colors">Choose Text Color:</label>
+            <select id="colors" name="colors">
+                <option value="black" select>Black</option>
+                <option value="red">Red</option>
+                <option value="green">Green</option>
+                <option value="yellow">yellow</option>
+            </select>
+
+            <label for="text_size">Choose text Size:</label>
+            <select id="text_size" name="text_size">
+                <option value="font-size:10px" style = "font-size:1vw">Small</option>
+                <option value="font-size:30px" style = "font-size:30px">Medium</option>
+                <option value="font-size:50px" style = "font-size:50px">Big</option>
+            </select>
+
+    </form>
+    <script>
+    const my_id = document.getElementById("w3review")
+    document.getElementById("colors").onchange = function(e){
+        var value = document.getElementById("colors").value;
+        my_id.style.color = value;
+    };
+    document.getElementById("text_size").onchange = function(e){
+        var size_value = document.getElementById("text_size").value;
+        my_id.style = size_value;
+    };
+    </script>
+
+{% endblock %}
