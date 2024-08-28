@@ -1,7 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import EmailField, PasswordField
 from wtforms.validators import DataRequired, Email, EqualTo, Length
-import email_validator
 from src.accounts.models import User
 
 
@@ -32,10 +31,12 @@ class RegisterForm(FlaskForm):
             self.password.errors.append("Passwords must match")
             return False
         return True
-    
+
+
 class LoginForm(FlaskForm):
     email = EmailField("Email", validators=[DataRequired(), Email()])
     password = PasswordField("Password", validators=[DataRequired()])
+
 
 class Add_user_Form(FlaskForm):
     email = EmailField(
@@ -64,4 +65,3 @@ class Add_user_Form(FlaskForm):
             self.password.errors.append("Passwords must match")
             return False
         return True
- 

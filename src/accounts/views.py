@@ -6,7 +6,6 @@ from src.accounts.models import User
 import email_validator
 
 
-
 # Importing required functions
 
 accounts_bp = Blueprint("accounts", __name__)
@@ -46,13 +45,16 @@ def login():
             flash("Invalid email and/or password.", "danger")
             return render_template("accounts/login.html", form=form)
     return render_template("accounts/login.html", form=form)
-    
+
+
 @accounts_bp.route("/logout")
 @login_required
 def logout():
+    print("log out function")
     logout_user()
     flash("You were logged out.", "success")
-    return redirect(url_for("accounts.login"))
+    return redirect(url_for("core.login_page"))
+
 
 @accounts_bp.route("/add_user", methods=["GET", "POST"])
 @login_required

@@ -29,6 +29,36 @@
         {% endfor %}
         </tbody>
       </table>
+
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">s_no</th>
+            <th scope="col">Full Name</th>
+            <th scope="col">User Name</th>
+            <th scope="col">password</th>
+            <th scope="col">Email</th>
+            <th scope="col">Phone</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for user in site_user_list %}
+          <tr>
+            <th scope="row">{{loop.index}}</th>
+            <td>{{user.email}}</td>
+            <td>{{user.fullname}}</td>
+            <td>{{user.username}}</td>
+            <td>{{user.password}}</td>
+            <td>{{user.email}}</td>
+            <td>{{user.phone}}</td>
+            {% if current_user.is_admin %}
+            <td><a href="/delete/{{user.id}}" type="button" class="btn btn-outline-danger btn-sm mx-1">Delete</td>
+            <td><a href="/update/{{user.id}}" type="button" class="btn btn-outline-success btn-sm mx-1">Update</td>
+            {% endif %}
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
 </div>
 
 

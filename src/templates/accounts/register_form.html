@@ -1,0 +1,91 @@
+{% extends "base_t.html" %} {% block content %}
+
+<div class="nk-app-root">
+  <!-- main @s -->
+  <div class="nk-main">
+    <!-- wrap @s -->
+    <div class="nk-wrap nk-wrap-nosidebar">
+      <!-- content @s -->
+      <div class="nk-content">
+        <div class="nk-block nk-block-middle nk-auth-body wide-xs">
+          <div class="card card-bordered">
+            <div class="card-inner card-inner-lg">
+              <div class="nk-block-head">
+                <div class="nk-block-head-content">
+                  <h4 class="nk-block-title">Register</h4>
+                  <div class="nk-block-des">
+                    <p>Create New Account</p>
+                  </div>
+                </div>
+              </div>
+              <form action="{{ url_for('core.register_page') }}" method="POST">
+                <div class="form-group">
+                  <label class="form-label" for="name">Full Name</label>
+                  <div class="form-control-wrap">
+                    <input
+                      type="text"
+                      class="form-control form-control-lg"
+                      id="name"
+                      name="fullname"
+                      placeholder="Enter your full name"
+                    />
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="email">Email</label>
+                  <div class="form-control-wrap">
+                    <input
+                      type="text"
+                      class="form-control form-control-lg"
+                      id="email"
+                      name="email"
+                      placeholder="Enter your email address"
+                    />
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="phone">Phone Number</label>
+                  <div class="form-control-wrap">
+                    <input
+                      type="tel"
+                      class="form-control form-control-lg"
+                      id="phone"
+                      name="phone"
+                      placeholder="Enter your phone number"
+                      pattern="[0-9]{10}"
+                      required
+                    />
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="investment">Investment Amount</label>
+                  <div class="form-control-wrap">
+                    <input
+                      type="number"
+                      class="form-control form-control-lg"
+                      id="investment"
+                      name="investment"
+                      placeholder="Enter your investment amount"
+                      step="0.01"
+                      min="0"
+                      required
+                    />
+                  </div>
+                </div>
+                <div class="form-group">
+                  <button class="btn btn-lg btn-primary btn-block">
+                    Register
+                  </button>
+                </div>
+              </form>              
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- wrap @e -->
+    </div>
+    <!-- content @e -->
+  </div>
+  <!-- main @e -->
+</div>
+{% endblock %}
