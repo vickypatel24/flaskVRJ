@@ -48,31 +48,13 @@
                 ></a>
               </div>
               <div class="nk-header-brand">
-                <a class="navbar-brand" href="dashboard.html"
+                <a class="navbar-brand" href="{{ url_for('core.dashboard') }}"
                   ><h3 style="color: white">Varniraj</h3></a
                 >
               </div>
               <!-- .nk-header-brand -->
               {% if current_user.is_authenticated %}
               <div class="nk-header-menu" data-content="headerNav">
-                <div class="nk-header-mobile">
-                  <div class="nk-header-brand">
-                    <a href="html/index.html" class="logo-link">
-                      <img
-                        class="logo-light logo-img"
-                        src="{{ url_for('static', filename='images/logo.png') }}"
-                        srcset="./images/logo2x.png 2x"
-                        alt="logo"
-                      />
-                      <img
-                        class="logo-dark logo-img"
-                        src="static/images/logo-dark.png"
-                        srcset="./images/logo-dark2x.png 2x"
-                        alt="logo-dark"
-                      />
-                    </a>
-                  </div>
-                </div>
                 <ul class="nk-menu nk-menu-main ui-s2">
                   <li class="nk-menu-item has-sub">
                     <a

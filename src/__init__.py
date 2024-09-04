@@ -6,6 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager # Add this line
 from flask import render_template
 from celery import Celery
+from flask_mail import Mail
 
 
 app = Flask(__name__)
@@ -17,6 +18,7 @@ login_manager.init_app(app) # Add this line
 bcrypt = Bcrypt(app)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+mail = Mail()
 
 # Registering blueprints
 from src.accounts.views import accounts_bp

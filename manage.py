@@ -25,6 +25,16 @@ app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['DATABASE_URL'] = os.getenv('DATABASE_URL')
 
+app.config['MAIL_SERVER'] = os.getenv("MAIL_SERVER", None)
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = os.getenv("MAIL_USERNAME", None)
+app.config['MAIL_PASSWORD'] = os.getenv("MAIL_PASSWORD", None)
+app.config['MAIL_DEFAULT_SENDER'] = os.getenv("MAIL_DEFAULT_SENDER", None)
+
+# mail = Mail(app)
+
+
 if not os.path.exists(app.config['UPLOAD_FOLDER']):
     os.makedirs(app.config['UPLOAD_FOLDER'])
 # Initialize Celery
@@ -62,6 +72,26 @@ def create_admin():
     except Exception:
         print("Couldn't create admin user.")
 
+
+def sending_mail(email,new_pass):
+    try:
+        print("try____________startttttttttttttttttttt")
+        msg = Message(
+            subject=f"Your new Password is {new_pass}",
+            recipients=[email]
+        )
+        print("+++++++++++++++++", msg)
+        msg.body = f"Your new password is {new_pass}. Please use this to log in."
+        mail.send(msg)
+
+        # # Update the user's password
+        # user.password = generate_password_hash(str(new_pass))  # Make sure to hash the password
+        # db.session.commit()
+
+        # flash("A new password has been sent to your email.", "success")
+
+    except Exception as e:
+        return   f"Failed to send email: {str(e)}"
 
 if __name__ == "__main__":
     cli()

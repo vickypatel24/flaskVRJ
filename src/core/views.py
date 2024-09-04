@@ -12,49 +12,40 @@ import random
 import os
 from manage import *
 import string
+from flask_mail import Mail, Message
 
+mail = Mail(app)
 
 core_bp = Blueprint("core", __name__)
 
 
-@core_bp.route("/")
+@core_bp.route("/dashboard")
 @login_required
-def home():
-    print("home function------ >>>>>>>>>>>>>>>>>")
-    user_list = User.query.filter_by(is_admin=False)
-    site_user_list = SiteUser.query.all()
-    print("site_user", site_user_list)
+def dashboard():
+    print("dashboard- >>>>>>>>>>>>>>>>>")
+    print(session['user_email'], "++++++++++")
 
-    for i in site_user_list:
-        print("------", i)
+    user = get_session_user()
 
-    # for i in user_list:
-    #     db.session.delete(i)
-    #     db.session.commit()
-    #     print(i,"deleted")
-    # task = user_password_long_task.apply_async()
-    return render_template("accounts/home.html", user_list=user_list, site_user_list=site_user_list)
+    site_users = SiteUser.query.all()
+    total_deposit = 0
 
+    for i in site_users:
 
-@core_bp.route("/newlogin", methods=["GET", "POST"])
-def login_page():
-    if request.method == "POST":
-        # Get form data
-        username_or_email = request.form.get("username_or_email")
-        password = request.form.get("password")
+        total_deposit = total_deposit + i.investment
 
-        user = User.query.filter(User.email == username_or_email).first()
-
-        # Check if user exists and password is correct
-        if user and check_password_hash(user.password, password):
-            login_user(user)
-            session['user_email'] = user.email
-            flash("Login successful!", "success")
-            return redirect(url_for('core.dashboard'))
-        else:
-            flash("Invalid credentials. Please try again.", "danger")
-
-    return render_template("accounts/login_form.html")
+    print("user_dashboard data", user)
+    print("total_deposit", total_deposit)
+    if user:
+        context = {
+            'user': user,
+            'site_users': site_users,
+            'total_deposit': total_deposit
+        }
+        return render_template("accounts/dashboard.html", **context)
+    else:
+        flash("You need to log in first.", "warning")
+        return redirect(url_for('core.login_page'))
 
 
 @core_bp.route("/new_register", methods=["GET", "POST"])
@@ -66,6 +57,7 @@ def register_page():
         fullname = request.form.get("fullname")
         email = request.form.get("email")
         phone = request.form.get("phone")
+        investment = request.form.get("investment")
 
         print("fullname", fullname)
         print("email", email)
@@ -98,7 +90,8 @@ def register_page():
             username=username,
             password=password,
             email=email,
-            phone=phone
+            phone=phone,
+            investment=investment
         )
 
         # Add the new user to the database
@@ -114,126 +107,149 @@ def register_page():
         return redirect(url_for('core.login_page'))
 
 
-@core_bp.route("/dashboard")
-def dashboard():
-    print("dashboard- >>>>>>>>>>>>>>>>>")
-    print(session['user_email'], "++++++++++")
+@core_bp.route("/newlogin", methods=["GET", "POST"])
+def login_page():
+    if request.method == "POST":
+        # Get form data
+        username_or_email = request.form.get("username_or_email")
+        password = request.form.get("password")
 
-    user = get_session_user()
+        user = User.query.filter(User.email == username_or_email).first()
 
-    site_users = SiteUser.query.all()
-    total_deposit = 10
+        # Check if user exists and password is correct
+        if user and check_password_hash(user.password, password):
+            login_user(user)
+            session['user_email'] = user.email
+            flash("Login successful!", "success")
+            return redirect(url_for('core.dashboard'))
+        else:
+            flash("Invalid credentials. Please try again.", "danger")
 
-    for i in site_users:
-
-        total_deposit = total_deposit + i.investment
-
-    print("user_dashboard data", user)
-    print("total_deposit", total_deposit)
-    if user:
-        return render_template("accounts/dashboard.html", user=user, site_users=site_users)
-    else:
-        flash("You need to log in first.", "warning")
-        return redirect(url_for('core.login_page'))
+    return render_template("accounts/login_form.html")
 
 
 @core_bp.route('/user_list', methods=['GET'])
 @login_required
 def user_list():
-
     user = get_session_user()
     user_count = 0
     site_users = SiteUser.query.all()
-    for site_users in site_users:
+    for site_user in site_users:
         user_count += 1
+        print("-----------site_user", site_user.created_on)
 
-    return render_template("accounts/user_list.html", user=user, user_count=user_count)
+    return render_template("accounts/user_list.html", user=user, user_count=user_count, site_users=site_users)
 
 
-@core_bp.route('/user_details', methods=['GET'])
+@core_bp.route('/user_details/<int:user_id>', methods=['GET'])
 # @core_bp.route('/user_card/<int:user_id>', methods=['GET'])
 @login_required
-def user_details():
-
+def user_details(user_id):
+    print("details________page", user_id)
+    site_user = SiteUser.query.get(user_id)
     user = get_session_user()
-    return render_template("accounts/user_details.html", user=user)
+    return render_template("accounts/user_details.html", user=user, site_user=site_user)
 
 
-@core_bp.route('/delete/<int:user_id>', methods=['GET'])
+@core_bp.route('/delete_user/<int:user_id>', methods=['GET'])
 @login_required
 def delete_user(user_id):
-    user = User.query.filter_by(id=user_id).first()
-    db.session.delete(user)
-    db.session.commit()
+    print("++++++++delete_user API")
+    user = SiteUser.query.filter_by(id=user_id).first()
+    print("User Deleted.-------------", user.fullname)
+    # db.session.delete(user)
+    # db.session.commit()
     flash("User Deleted.", "success")
-    return redirect(url_for("accounts.login"))
+    return redirect(url_for("core.user_list"))
 
 
-@core_bp.route('/update/<int:id>', methods=['GET', 'POST'])
+@core_bp.route('/reste_password/<int:user_id>', methods=['GET', 'POST'])
 @login_required
-def update(id):
-    user = User.query.filter_by(id=id).first()
+def reste_password(user_id):
+    user = get_session_user()
+    print("reste_passwoooooord", user)
+    print("request.method", request.method)
     if request.method == 'POST':
-        email = request.form['email']
-        pass_word = request.form['password']
-        if pass_word:
-            password = bcrypt.generate_password_hash(pass_word)
-            user.password = password
-        user.email = email
+        print("request.method POSTTTTT", )
+        site_user = SiteUser.query.filter_by(id=user_id).first()
+        password = request.form.get("password")
+        print("password", password)
+        if password:
+            site_user.password = password
         db.session.commit()
-        return redirect(url_for('core.home'))
-    return render_template("accounts/update.html", user_data=user)
+        return redirect(url_for('core.dashboard'))
+    return render_template("accounts/reset_password.html", user=user, site_user_id=user_id)
 
-
-@core_bp.route('/send_otp', methods=["GET", "POST"])
-def send_otp():
-    if request.method == 'POST':
-        email = request.form['email']
-        user = User.query.filter_by(email=email).first()
-        if user:
-            otp = random.randint(100000, 999999)
-            flash("You Password Reset Done!", "success")
-            return redirect(url_for('accounts.login'))
-        else:
-            flash("Please Enter Valid Email")
-    return render_template("accounts/forget_password.html")
 
 
 @core_bp.route('/forget_password', methods=["GET", "POST"])
 def forget_password():
     if request.method == 'POST':
+        # from src import mail
         email = request.form['email']
-        pass_word = request.form['password']
+        print("email>>>>>>>>>>>>>>>>>>>>", email)
         user = User.query.filter_by(email=email).first()
-        if user and pass_word:
-            if pass_word:
-                password = bcrypt.generate_password_hash(pass_word)
-                user.password = password
-            db.session.commit()
-            flash("You Password Reset Done!", "success")
-            return redirect(url_for('accounts.login'))
+
+        if user:
+            new_pass = random.randint(100000, 999999)
+            print("new_pass-------------------", new_pass)
+
+            sendmail = sending_mail(email, new_pass)
+            # try:
+            #     print("try____________startttttttttttttttttttt")
+            #     msg = Message(
+            #         subject=f"Your new Password is {new_pass}",
+            #         recipients=[user.email]
+            #     )
+            #     print("+++++++++++++++++", msg)
+            #     msg.body = f"Your new password is {new_pass}. Please use this to log in."
+            #     mail.send(msg)
+
+            #     # # Update the user's password
+            #     # user.password = generate_password_hash(str(new_pass))  # Make sure to hash the password
+            #     # db.session.commit()
+
+            #     # flash("A new password has been sent to your email.", "success")
+
+            # except Exception as e:
+            #     return f"Failed to send email: {str(e)}"
+            return redirect(url_for('core.login_page'))
         else:
-            flash("Please Enter Valid Email")
+            flash("Please enter a valid email address.", "danger")
+
     return render_template("accounts/forget_password.html")
 
 
-@login_required
-def password_modifying():
-    user_list = User.query.filter_by(is_admin=False)
-    for user in user_list:
-        hashed_password = user.password
-        print('hashed_password11111111111111: ', hashed_password)
-        is_hashed = True
-        try:
-            # Change 'test' to an example password
-            bcrypt.check_password_hash(hashed_password, 'test')
-        except ValueError:
-            is_hashed = False
-        if is_hashed == False:
-            hashed_password = bcrypt.generate_password_hash(
-                hashed_password).decode('utf-8')
-            print(f"Username: {user.email}, Is Hashed: {is_hashed}")
-        print('hashed_password2222222222222222: ', hashed_password)
+# @core_bp.route('/forget_password', methods=["GET", "POST"])
+# def forget_password():
+#     if request.method == 'POST':
+#         email = request.form['email']
+#         pass_word = request.form['password']
+#         user = User.query.filter_by(email=email).first()
+#         if user and pass_word:
+#             if pass_word:
+#                 password = bcrypt.generate_password_hash(pass_word)
+#                 user.password = password
+#             db.session.commit()
+#             flash("You Password Reset Done!", "success")
+#             return redirect(url_for('accounts.login'))
+#         else:
+#             flash("Please Enter Valid Email")
+#     return render_template("accounts/forget_password.html")
+
+
+# @core_bp.route('/send_otp', methods=["GET", "POST"])
+# def send_otp():
+#     if request.method == 'POST':
+#         email = request.form['email']
+#         user = User.query.filter_by(email=email).first()
+#         if user:
+#             otp = random.randint(100000, 999999)
+#             flash("You Password Reset Done!", "success")
+#             return redirect(url_for('accounts.login'))
+#         else:
+#             flash("Please Enter Valid Email")
+#     return render_template("accounts/forget_password.html")
 
 
 def get_session_user():
